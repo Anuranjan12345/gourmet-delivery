@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Menu - Gourmet Delivery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Correct path for Tomcat webapp -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+
+        <a href="index.html" class="navbar-brand">
+
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="color:var(--primary)"
+            >
+                <path d="M11 21.73a2 2 0 0 0 2.98 0l7-7.68a2 2 0 0 0 .5-1.55 9.77 9.77 0 0 0-4.48-8.29 2 2 0 0 0-2 .14l-3 2.5-3-2.5a2 2 0 0 0-2-.14 9.77 9.77 0 0 0-4.48 8.29 2 2 0 0 0 .5 1.55z"></path>
+            </svg>
+
+            Gourmet<span>Delivery</span>
+
+        </a>
+
+        <ul class="navbar-nav" id="navbar-links">
+            <!-- Populated by JavaScript -->
+        </ul>
+
+    </nav>
+
+
+    <!-- Restaurant Header -->
+    <div class="menu-header-section">
+
+        <div class="container">
+
+            <a
+                href="index.html"
+                style="
+                    display:inline-flex;
+                    align-items:center;
+                    color:var(--text-muted);
+                    margin-bottom:1rem;
+                    font-size:0.9rem;
+                "
+            >
+                ← Back to Restaurants
+            </a>
+
+            <h1 class="menu-title" id="restaurant-name">
+                Loading...
+            </h1>
+
+            <p class="menu-subtitle" id="restaurant-cuisine">
+                Loading details...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Food Menu -->
+    <main class="container">
+
+        <div id="food-list" class="food-grid">
+            <p>Loading menu...</p>
+        </div>
+
+    </main>
+
+
+    <!-- Correct JavaScript path -->
+    <script src="js/script.js"></script>
+
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            requireAuth();
+
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const restaurantId = urlParams.get('id');
+
+
+            // If restaurant ID is missing
+            if (!restaurantId) {
+
+                window.location.href = 'index.html';
+
+                return;
+            }
+
+
+            try {
+
+                /*
+                 * Get restaurant information
+                 */
+                const restaurants = await apiFetch('/restaurants');
+
+                const restaurant =
+                    restaurants.find(r => r.id == restaurantId);
+
+
+                if (restaurant) {
+
+                    document.getElementById('restaurant-name').textContent =
+                        restaurant.name;
+
+                    document.getElementById('restaurant-cuisine').textContent =
+                        `${restaurant.cuisine} • ${restaurant.rating} ★ Rating • ${restaurant.time}`;
+                }
+
+
+                /*
+                 * Get food items for this restaurant
+                 */
+                const foods =
+                    await apiFetch(`/food/${restaurantId}`);
+
+
+                const grid =
+                    document.getElementById('food-list');
+
+
+                /*
+                 * If restaurant has no food
+                 */
+                if (!foods || foods.length === 0) {
+
+                    grid.innerHTML =
+                        '<p>No food items available for this restaurant.</p>';
+
+                    return;
+                }
+
+
+                /*
+                 * Create food cards
+                 */
+                grid.innerHTML = foods.map(item => {
+
+                    const imageHTML = item.image
+                        ? `<img src="${item.image}" alt="${item.name}">`
+                        : `<div style="
+                                height:220px;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                color:var(--text-muted);
+                                background:#f5f5f5;
+                            ">
+                                No image available
+                           </div>`;
+
+
+                    return `
+                        <div class="food-card">
+
+                            <div class="food-img-container">
+                                ${imageHTML}
+                            </div>
+
+                            <div class="food-info">
+
+                                <h3
+                                    style="
+                                        font-size:1.1rem;
+                                        font-weight:600;
+                                        margin-bottom:0.25rem;
+                                    "
+                                >
+                                    ${item.name}
+                                </h3>
+
+                                <p
+                                    style="
+                                        font-size:0.85rem;
+                                        color:var(--text-muted);
+                                        flex-grow:1;
+                                    "
+                                >
+                                    ${item.description}
+                                </p>
+
+                                <div class="food-price">
+
+                                    <span>
+                                        $${Number(item.price).toFixed(2)}
+                                    </span>
+
+                                    <button
+                                        class="btn-add-cart"
+                                        onclick='addToCart(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+                                    >
+                                        Add +
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }).join('');
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById('food-list').innerHTML =
+                    '<p>Failed to load menu.</p>';
+            }
+
+        });
+
+
+        /*
+         * Add food item to cart
+         */
+        function addToCart(item) {
+
+            CartService.addToCart(item);
+
+        }
+
+    </script>
+
+</body>
+</html>

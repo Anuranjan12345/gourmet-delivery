@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Gourmet Delivery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24" height="24" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round"
+                 style="color:var(--primary)">
+                <path d="M11 21.73a2 2 0 0 0 2.98 0l7-7.68a2 2 0 0 0 .5-1.55 9.77 9.77 0 0 0-4.48-8.29 2 2 0 0 0-2 .14l-3 2.5-3-2.5a2 2 0 0 0-2-.14 9.77 9.77 0 0 0-4.48 8.29 2 2 0 0 0 .5 1.55z"></path>
+            </svg>
+            Gourmet<span>Delivery</span>
+        </a>
+
+        <ul class="navbar-nav" id="navbar-links">
+        </ul>
+    </nav>
+
+    <div class="menu-header-section">
+        <div class="container">
+            <a href="index.html" class="back-to-restaurants">
+                ← Back to Restaurants
+            </a>
+
+            <h1 class="menu-title" id="restaurant-name">
+                Burger King
+            </h1>
+
+            <p class="menu-subtitle" id="restaurant-cuisine">
+                Loading details...
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="food-list" class="food-grid"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            requireAuth();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const restaurantId = urlParams.get('id');
+
+            if (!restaurantId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const restaurants = await apiFetch('/restaurants');
+                const restaurant = restaurants.find(
+                    r => r.id == restaurantId
+                );
+
+                if (restaurant) {
+                    document.getElementById('restaurant-name').textContent =
+                        restaurant.name;
+
+                    document.getElementById('restaurant-cuisine').textContent =
+                        `${restaurant.cuisine} • ${restaurant.rating} ★ Rating • ${restaurant.time}`;
+                }
+
+                const foods = await apiFetch(`/food/${restaurantId}`);
+                const grid = document.getElementById('food-list');
+
+                grid.innerHTML = foods.map(item => `
+                    <div class="food-card">
+                        <div class="food-img-container">
+                            <img
+                                src="${item.image}"
+                                alt="${item.name}"
+                                onerror="this.style.display='none'"
+                            >
+                        </div>
+
+                        <div class="food-info">
+                            <h3 style="font-size:1.1rem; font-weight:600; margin-bottom:0.25rem;">
+                                ${item.name}
+                            </h3>
+
+                            <p style="font-size:0.85rem; color:var(--text-muted); flex-grow:1;">
+                                ${item.description}
+                            </p>
+
+                            <div class="food-price">
+                                <span>₹${Number(item.price).toFixed(2)}</span>
+
+                                <button
+                                    type="button"
+                                    class="btn-add-cart"
+                                    onclick='addToCart(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+                                >
+                                    Add +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Failed to load restaurant menu:', error);
+
+                document.getElementById('food-list').innerHTML =
+                    '<p>Failed to load menu. Please try again.</p>';
+            }
+        });
+
+        function addToCart(item) {
+            CartService.addToCart(item);
+        }
+    </script>
+</body>
+</html>
+```

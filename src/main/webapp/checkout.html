@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Delivery - Checkout</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="checkout-body">
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand" aria-label="Gourmet Delivery home">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24" height="24" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 21.73a2 2 0 0 0 2.98 0l7-7.68a2 2 0 0 0 .5-1.55 9.77 9.77 0 0 0-4.48-8.29 2 2 0 0 0-2 .14l-3 2.5-3-2.5a2 2 0 0 0-2-.14 9.77 9.77 0 0 0-4.48 8.29 2 2 0 0 0 .5 1.55z"></path>
+            </svg>
+            Gourmet<span>Delivery</span>
+        </a>
+
+        <ul class="navbar-nav" id="navbar-links"></ul>
+    </nav>
+
+    <main class="checkout-page">
+
+        <div class="page-intro checkout-intro">
+            <p class="eyebrow">ALMOST THERE</p>
+            <h1>Checkout</h1>
+            <p>One last step before your food arrives.</p>
+            <a class="back-link" href="cart.html">← Back to Cart</a>
+        </div>
+        <div class="checkout-layout">
+
+            <section class="checkout-summary-card">
+                <h2 id="checkout-section-title">Order Summary</h2>
+                <div id="checkout-summary">
+                    <p>Loading your order summary...</p>
+                </div>
+            </section>
+
+            <section id="delivery-section" class="checkout-delivery-card">
+                <h2>Delivery Details</h2>
+                <p class="checkout-help-text">
+                    Enter the complete address where you would like your
+                    food delivered.
+                </p>
+
+                <form id="checkout-form">
+                    <label for="deliveryAddress">Delivery Address</label>
+
+                    <textarea
+                        id="deliveryAddress"
+                        name="deliveryAddress"
+                        rows="4"
+                        required
+                        maxlength="500"
+                        placeholder="House / flat number, street, area, city, PIN code"></textarea>
+
+                    <p class="checkout-security-note">
+                        Please double-check your address before placing your order.
+                    </p>
+
+                    <button type="submit" id="place-order-button">
+                        Place Order
+                    </button>
+                </form>
+            </section>
+
+            <div id="checkout-message" role="status" aria-live="polite"></div>
+
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const summary = document.getElementById('checkout-summary');
+            const summaryTitle = document.getElementById('checkout-section-title');
+            const deliverySection = document.getElementById('delivery-section');
+            const form = document.getElementById('checkout-form');
+            const addressInput = document.getElementById('deliveryAddress');
+            const button = document.getElementById('place-order-button');
+            const message = document.getElementById('checkout-message');
+
+            function showMessage(text, success = false) {
+                message.textContent = text;
+                message.className = success
+                    ? 'checkout-message success'
+                    : 'checkout-message error';
+            }
+
+            function addDetail(parent, label, value) {
+                const row = document.createElement('p');
+                const labelElement = document.createElement('strong');
+                const valueElement = document.createElement('span');
+
+                labelElement.textContent = label;
+                valueElement.textContent = value;
+
+                row.append(labelElement, valueElement);
+                parent.appendChild(row);
+            }
+
+            try {
+                if (!AuthService.isAuthenticated() || !CartService.getUserId()) {
+                    summary.textContent = 'Please log in to continue.';
+                    form.hidden = true;
+                    return;
+                }
+
+                const cart = await CartService.getCart();
+
+                if (!Array.isArray(cart) || cart.length === 0) {
+                    summary.innerHTML = `
+                        <div class="checkout-empty">
+                            <p>Your cart is empty.</p>
+                            <a class="btn btn-primary" href="menu.html">
+                                Browse Food
+                            </a>
+                        </div>`;
+                    form.hidden = true;
+                    return;
+                }
+
+                let total = 0;
+                const list = document.createElement('div');
+                list.className = 'checkout-items-list';
+
+                cart.forEach(item => {
+                    const quantity = Number(item.quantity || 0);
+                    const price = Number(item.foodPrice || 0);
+                    const subtotal = price * quantity;
+
+                    total += subtotal;
+
+                    const row = document.createElement('div');
+                    row.className = 'checkout-item-row';
+
+                    const name = document.createElement('span');
+                    name.textContent =
+                        `${item.foodName || 'Food item'} × ${quantity}`;
+
+                    const amount = document.createElement('strong');
+                    amount.textContent = formatPrice(subtotal);
+
+                    row.append(name, amount);
+                    list.appendChild(row);
+                });
+
+                const totalElement = document.createElement('div');
+                totalElement.className = 'checkout-total-row';
+
+                const totalLabel = document.createElement('span');
+                totalLabel.textContent = 'Total';
+
+                const totalValue = document.createElement('strong');
+                totalValue.textContent = formatPrice(total);
+
+                totalElement.append(totalLabel, totalValue);
+                summary.replaceChildren(list, totalElement);
+
+            } catch (error) {
+                console.error('Checkout initialization failed:', error);
+                summary.textContent =
+                    'Unable to load your cart. Please try again.';
+                form.hidden = true;
+                return;
+            }
+
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+
+                const deliveryAddress = addressInput.value.trim();
+                const userId = CartService.getUserId();
+
+                if (deliveryAddress.length < 8) {
+                    showMessage('Please enter a complete delivery address.');
+                    addressInput.focus();
+                    return;
+                }
+
+                button.disabled = true;
+                button.textContent = 'Placing Order…';
+                message.textContent = '';
+
+                try {
+                    const formData = new URLSearchParams();
+                    formData.append('userId', userId);
+                    formData.append('deliveryAddress', deliveryAddress);
+
+                    const order = await apiFetch('/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/x-www-form-urlencoded'
+                        },
+                        body: formData
+                    });
+
+                    form.hidden = true;
+                    summaryTitle.textContent = 'Order Confirmed';
+                    summary.replaceChildren();
+
+                    const successMark = document.createElement('div');
+                    successMark.className = 'order-success-mark';
+                    successMark.textContent = '✓';
+
+                    const heading = document.createElement('h2');
+                    heading.className = 'confirmation-heading';
+                    heading.textContent = 'Thank you for your order!';
+
+                    const intro = document.createElement('p');
+                    intro.className = 'confirmation-copy';
+                    intro.textContent =
+                        'Your order has been placed successfully.';
+
+                    const details = document.createElement('div');
+                    details.className = 'confirmation-details';
+
+                    addDetail(details, 'Order number', `#${order.id}`);
+                    addDetail(details, 'Order status', order.status || 'PLACED');
+                    addDetail(
+                        details,
+                        'Order total',
+                        formatPrice(Number(order.totalAmount))
+                    );
+
+                    const addressCard = document.createElement('div');
+                    addressCard.className = 'confirmation-address';
+
+                    const addressTitle = document.createElement('h3');
+                    addressTitle.textContent = 'Delivering to';
+
+                    const addressText = document.createElement('p');
+                    addressText.textContent =
+                        order.deliveryAddress || deliveryAddress;
+
+                    addressCard.append(addressTitle, addressText);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'confirmation-actions';
+
+                    const ordersLink = document.createElement('a');
+                    ordersLink.href = 'orders.html';
+                    ordersLink.className = 'btn btn-primary';
+                    ordersLink.textContent = 'View My Orders';
+
+                    const homeLink = document.createElement('a');
+                    homeLink.href = 'index.html';
+                    homeLink.className = 'btn btn-secondary';
+                    homeLink.textContent = 'Back to Home';
+
+                    actions.append(ordersLink, homeLink);
+
+                    summary.append(
+                        successMark,
+                        heading,
+                        intro,
+                        details,
+                        addressCard,
+                        actions
+                    );
+
+                    deliverySection.hidden = true;
+
+                    showMessage('Order placed successfully!', true);
+
+                    if (typeof updateCartCount === 'function') {
+                        await updateCartCount();
+                    }
+
+                } catch (error) {
+                    console.error('Order placement failed:', error);
+
+                    showMessage(
+                        'Unable to place your order. Please check your details and try again.'
+                    );
+
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Place Order';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

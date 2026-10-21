@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Delivery - Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/main/resources/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <!-- Simple SVG Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M11 21.73a2 2 0 0 0 2.98 0l7-7.68a2 2 0 0 0 .5-1.55 9.77 9.77 0 0 0-4.48-8.29 2 2 0 0 0-2 .14l-3 2.5-3-2.5a2 2 0 0 0-2-.14 9.77 9.77 0 0 0-4.48 8.29 2 2 0 0 0 .5 1.55z"></path></svg>
+            Gourmet<span>Delivery</span>
+        </a>
+<ul class="navbar-nav" id="navbar-links">
+
+    <li>
+        <a href="cart.html" class="nav-link">
+            🛒 Cart
+            <span id="cart-count" class="cart-count">0</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="#" class="nav-link" id="profile-link">
+            👤 Profile
+        </a>
+    </li>
+
+</ul>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Delicious Food,<br>Delivered Fast.</h1>
+            <p class="hero-subtitle">Order from the best local restaurants with easy, on-demand delivery.</p>
+            <a href="#restaurant-list" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Explore Restaurants</a>
+        </div>
+    </div>
+
+    <div class="container" id="restaurant-list-section">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2rem;">
+            <div>
+                <h2 style="font-size: 2rem;">Popular Restaurants</h2>
+                <p style="color:var(--text-muted)">Top rated by customers near you</p>
+            </div>
+            <!-- Optional Search/Filter could go here -->
+        </div>
+
+<div class="grid-restaurants" id="restaurant-list">
+                    <div class="card" onclick="window.location.href='menu.html?id=1'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/burger-king (1).png" alt="Burger King" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Burger King</h3>
+                                <div class="rating-badge">★ 4.5</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">American • $1.99 Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 25-35 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="card" onclick="window.location.href='menu.html?id=2'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/pizza-hut.png" alt="Pizza Hut" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Pizza Hut</h3>
+                                <div class="rating-badge">★ 4.2</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">Italian • $3.49 Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 40-50 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="card" onclick="window.location.href='menu.html?id=3'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/sushi-world.png" alt="Sushi World" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Sushi World</h3>
+                                <div class="rating-badge">★ 4.8</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">Japanese • $2.99 Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 30-45 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="card" onclick="window.location.href='menu.html?id=4'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/taco-bell.png" alt="Taco Bell" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Taco Bell</h3>
+                                <div class="rating-badge">★ 4</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">Mexican • $0.99 Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 15-25 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="card" onclick="window.location.href='menu.html?id=5'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/salad-bar.png" alt="Green Salad Bar" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Green Salad Bar</h3>
+                                <div class="rating-badge">★ 4.9</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">Healthy • Free Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 20-30 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="card" onclick="window.location.href='menu.html?id=6'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="/src/main/resources/static/images/restaurant/steak-house.png" alt="Steakhouse Prime" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">Steakhouse Prime</h3>
+                                <div class="rating-badge">★ 4.7</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">Steakhouse • $5.99 Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 50-65 min</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            requireAuth();
+            
+            const grid = document.getElementById('restaurant-list');
+            try {
+                const restaurants = await apiFetch('/restaurants');
+                
+                grid.innerHTML = restaurants.map(r => `
+                    <div class="card" onclick="window.location.href='menu.html?id=${r.id}'" style="cursor:pointer">
+                        <div class="card-img-wrapper">
+                            <img src="${r.image}" alt="${r.name}" class="card-img">
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem">
+                                <h3 class="card-title">${r.name}</h3>
+                                <div class="rating-badge">★ ${r.rating}</div>
+                            </div>
+                            <p style="color:var(--text-muted); margin-bottom: 1rem;">${r.cuisine} • ${r.delivery} Delivery</p>
+                            <div class="card-meta">
+                                <span>🕒 ${r.time}</span>
+                                <span style="color:var(--primary); font-weight:600">View Menu →</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                grid.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1">Failed to load restaurants.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

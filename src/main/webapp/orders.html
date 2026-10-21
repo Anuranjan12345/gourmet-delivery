@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Delivery - My Orders</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="orders-page">
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand" aria-label="Gourmet Delivery home">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24" height="24" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 21.73a2 2 0 0 0 2.98 0l7-7.68a2 2 0 0 0 .5-1.55 9.77 9.77 0 0 0-4.48-8.29 2 2 0 0 0-2 .14l-3 2.5-3-2.5a2 2 0 0 0-2-.14 9.77 9.77 0 0 0-4.48 8.29 2 2 0 0 0 .5 1.55z"></path>
+            </svg>
+            Gourmet<span>Delivery</span>
+        </a>
+
+        <ul class="navbar-nav" id="navbar-links"></ul>
+    </nav>
+
+    <main class="orders-main">
+
+        <header class="orders-intro">
+            <p class="eyebrow">YOUR FOOD JOURNEY</p>
+            <h1>My Orders</h1>
+            <p>Track your orders and revisit your favourite meals.</p>
+
+            <a href="index.html" class="orders-back-link">
+                <span aria-hidden="true">←</span> Back to Home
+            </a>
+        </header>
+
+        <section id="orders-container" aria-live="polite">
+            <p class="orders-loading">Loading your orders...</p>
+        </section>
+
+    </main>
+
+    <script src="js/script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadOrders);
+
+        function getOrderImage(foodName) {
+            const name = String(foodName || '').toLowerCase();
+
+            if (name.includes('pepperoni')) {
+                return 'images/foods/pepperoni.png';
+            }
+
+            if (name.includes('margherita')) {
+                return 'images/foods/margherita.png';
+            }
+
+            if (name.includes('whopper')) {
+                return 'images/foods/whopper.png';
+            }
+
+            if (
+                name.includes('burger') ||
+                name.includes('cheeseburger') ||
+                name.includes('zinger')
+            ) {
+                return 'images/foods/cheeseburger.png';
+            }
+
+            if (name.includes('coke') || name.includes('soft drink')) {
+                return 'images/foods/coke.png';
+            }
+
+            if (name.includes('nachos')) {
+                return 'images/foods/nachos.png';
+            }
+
+            if (name.includes('salmon nigiri')) {
+                return 'images/foods/salmon-nigiri.png';
+            }
+
+            if (name.includes('spicy tuna')) {
+                return 'images/foods/spicy-tuna.png';
+            }
+
+            return 'images/foods/cheeseburger.png';
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[character]);
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('orders-container');
+
+            try {
+                if (!AuthService.isAuthenticated()) {
+                    container.innerHTML = `
+                        <div class="orders-empty-state">
+                            <div class="orders-empty-icon" aria-hidden="true">👤</div>
+                            <h2>Please log in</h2>
+                            <p>Log in to view your order history.</p>
+                            <a class="orders-primary-button" href="login.html">
+                                Log In
+                            </a>
+                        </div>`;
+                    return;
+                }
+
+                const userId = CartService.getUserId();
+
+                if (!userId) {
+                    container.textContent =
+                        'Unable to identify your account. Please log in again.';
+                    return;
+                }
+
+                const orders = await apiFetch(
+                    `/orders/${encodeURIComponent(userId)}`
+                );
+
+                if (!Array.isArray(orders) || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="orders-empty-state">
+                            <div class="orders-empty-icon" aria-hidden="true">🍽️</div>
+                            <h2>No orders yet</h2>
+                            <p>Your next favourite meal is waiting to be discovered.</p>
+                            <a class="orders-primary-button" href="index.html">
+                                Explore Restaurants →
+                            </a>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => {
+                    const items = Array.isArray(order.items)
+                        ? order.items
+                        : [];
+
+                    const itemRows = items.map(item => {
+                        const name = String(item.name || 'Food item');
+                        const quantity = Number(item.quantity || 0);
+                        const price = Number(item.price || 0);
+                        const image = getOrderImage(name);
+
+                        return `
+                            <div class="orders-food-row">
+                                <img
+                                    class="orders-food-image"
+                                    src="${image}"
+                                    alt="${escapeHTML(name)}"
+                                    loading="lazy"
+                                    onerror="this.onerror=null;this.src='images/foods/cheeseburger.png';">
+
+                                <div class="orders-food-details">
+                                    <h3>${escapeHTML(name)}</h3>
+                                    <p>Quantity: ${quantity}</p>
+                                </div>
+
+                                <strong class="orders-food-price">
+                                    ${formatPrice(price * quantity)}
+                                </strong>
+                            </div>`;
+                    }).join('');
+
+                    const orderDate = order.createdAt
+                        ? new Date(order.createdAt).toLocaleString('en-IN')
+                        : 'Date unavailable';
+
+                    const status = String(order.status || 'PLACED');
+                    const orderId = Number(order.id);
+                    const total = Number(order.totalAmount || 0);
+
+                    return `
+                        <article class="orders-card">
+
+                            <div class="orders-card-header">
+                                <div>
+                                    <p class="orders-label">ORDER NUMBER</p>
+                                    <h2>Order #${orderId}</h2>
+                                    <p class="orders-date">${escapeHTML(orderDate)}</p>
+                                </div>
+
+                                <span class="orders-status">
+                                    ${escapeHTML(status)}
+                                </span>
+                            </div>
+
+                            <div class="orders-food-list">
+                                ${itemRows || '<p>No item details available.</p>'}
+                            </div>
+
+                            <div class="orders-address">
+                                <span class="orders-address-icon" aria-hidden="true">📍</span>
+                                <div>
+                                    <strong>Delivery Address</strong>
+                                    <p>${escapeHTML(order.deliveryAddress || 'Address unavailable')}</p>
+                                </div>
+                            </div>
+
+                            <div class="orders-card-footer">
+                                <span>Order Total</span>
+                                <strong>${formatPrice(total)}</strong>
+                            </div>
+
+                        </article>`;
+                }).join('');
+
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+
+                container.innerHTML = `
+                    <div class="orders-empty-state">
+                        <h2>We couldn't load your orders</h2>
+                        <p>Please check your connection and try again.</p>
+                        <button type="button"
+                                class="orders-primary-button"
+                                onclick="loadOrders()">
+                            Try Again
+                        </button>
+                    </div>`;
+            }
+        }
+    </script>
+
+</body>
+</html>
